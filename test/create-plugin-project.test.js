@@ -23,8 +23,10 @@ describe("createPluginProject", () => {
     });
 
     assert.equal(result.projectDir, path.join(cwd, "demo-plugin"));
-    assert.equal(fs.existsSync(path.join(result.projectDir, "manifest.json")), true);
+    assert.equal(fs.existsSync(path.join(result.projectDir, "src", "manifest.json")), true);
     assert.equal(fs.existsSync(path.join(result.projectDir, "src", "index.ts")), true);
+    assert.equal(fs.existsSync(path.join(result.projectDir, "schemas", "sailor-plugin-manifest.schema.json")), true);
+    assert.equal(fs.existsSync(path.join(result.projectDir, ".vscode", "settings.json")), true);
 
     const pkg = JSON.parse(fs.readFileSync(path.join(result.projectDir, "package.json"), "utf8"));
     assert.equal(pkg.dependencies["@auvexis/sailor-sdk"], "latest");
@@ -91,7 +93,11 @@ describe("createPluginProject", () => {
       installDependencies: false,
     });
 
+    const manifest = JSON.parse(fs.readFileSync(path.join(projectDir, "src", "manifest.json"), "utf8"));
     const methods = fs.readFileSync(path.join(projectDir, "src", "methods.ts"), "utf8");
-    assert.match(methods, /async ping/);
+
+    assert.deepEqual(Object.keys(manifest.methods), ["run"]);
+    assert.match(methods, /async run/);
+    assert.doesNotMatch(methods, /message: string/);
   });
 });

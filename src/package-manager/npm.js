@@ -1,9 +1,10 @@
 import { spawnSync } from "node:child_process";
 
-export function npmInstall(cwd) {
-  const result = spawnSync("npm", ["install"], {
+export function npmInstall(cwd, options = {}) {
+  const spawnSyncImpl = options.spawnSyncImpl ?? spawnSync;
+  const result = spawnSyncImpl("npm", ["install"], {
     cwd,
-    stdio: "inherit",
+    stdio: options.stdio ?? "pipe",
     shell: process.platform === "win32",
   });
 
@@ -12,10 +13,11 @@ export function npmInstall(cwd) {
   }
 }
 
-export function npmRun(cwd, script) {
-  const result = spawnSync("npm", ["run", script], {
+export function npmRun(cwd, script, options = {}) {
+  const spawnSyncImpl = options.spawnSyncImpl ?? spawnSync;
+  const result = spawnSyncImpl("npm", ["run", script], {
     cwd,
-    stdio: "inherit",
+    stdio: options.stdio ?? "pipe",
     shell: process.platform === "win32",
   });
 

@@ -1,8 +1,12 @@
+import { manifestSchema } from "@auvexis/sailor-sdk/manifest-schema";
+
 function json(value) {
   return `${JSON.stringify(value, null, 2)}\n`;
 }
 
 function manifest(input) {
+  const methodName = input.withExample ? "echoMessage" : "run";
+
   return {
     metadata: {
       id: input.name,
@@ -18,10 +22,12 @@ function manifest(input) {
       repository: input.repository,
     },
     methods: {
-      ping: {
+      [methodName]: {
         metadata: {
-          label: "Ping",
-          description: "Returns a simple pong response.",
+          label: input.withExample ? "Echo Message" : "Run",
+          description: input.withExample
+            ? "Echoes a message back to the workflow."
+            : "Starter method for this plugin.",
         },
         parameters: {
           type: "object",
@@ -40,7 +46,7 @@ function manifest(input) {
           type: "object",
           "x-sailor-display": "generic",
           properties: {
-            pong: { type: "boolean", "x-label": "Pong" },
+            ok: { type: "boolean", "x-label": "OK" },
             message: { type: "string", "x-label": "Message" },
           },
         },
@@ -73,7 +79,7 @@ function packageJson(input) {
 
 function indexTs() {
   return `import { definePlugin, type PluginManifest } from "@auvexis/sailor-sdk";
-import manifest from "../manifest.json" with { type: "json" };
+import manifest from "./manifest.json" with { type: "json" };
 import { createMethods } from "./methods.js";
 
 export default definePlugin({
@@ -89,9 +95,9 @@ function methodsTs(input) {
   if (!input.withExample) {
     return `export function createMethods() {
   return {
-    async ping() {
+    async run() {
       return {
-        pong: true,
+        ok: true,
       };
     },
   };
@@ -101,9 +107,9 @@ function methodsTs(input) {
 
   return `export function createMethods() {
   return {
-    async ping(params: { message: string }) {
+    async echoMessage(params: { message: string }) {
       return {
-        pong: true,
+        ok: true,
         message: params.message,
       };
     },
@@ -115,7 +121,19 @@ function methodsTs(input) {
 export function pluginFiles(input) {
   return new Map([
     ["package.json", json(packageJson(input))],
-    ["manifest.json", json(manifest(input))],
+    ["src/manifest.json", json(manifest(input))],
+    ["schemas/sailor-plugin-manifest.schema.json", json(manifestSchema)],
+    [
+      ".vscode/settings.json",
+      json({
+        "json.schemas": [
+          {
+            fileMatch: ["/src/manifest.json"],
+            url: "./schemas/sailor-plugin-manifest.schema.json",
+          },
+        ],
+      }),
+    ],
     [
       "tsconfig.json",
       json({

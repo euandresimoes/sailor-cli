@@ -22,7 +22,7 @@ Docs:
 export function createSuccessMessage(projectDir) {
   return `${pc.green("Plugin created.")} Next:
   cd ${projectDir}
-  npm run build
+  sailor build
 
 Docs: ${pc.cyan("https://sailor.auvexis.com/api/docs")}`;
 }

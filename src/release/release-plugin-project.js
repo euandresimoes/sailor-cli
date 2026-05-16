@@ -17,7 +17,7 @@ function assertFile(filePath, label) {
 }
 
 export function validatePluginProject(cwd) {
-  const manifestPath = path.join(cwd, "manifest.json");
+  const manifestPath = path.join(cwd, "src", "manifest.json");
   assertFile(manifestPath, "manifest.json");
 
   const result = validateManifest(readJson(manifestPath));
@@ -48,7 +48,7 @@ export function releasePluginProject({ cwd, runBuild = true, runner = npmRun } =
   fs.mkdirSync(releaseDir, { recursive: true });
 
   for (const file of RELEASE_FILES) {
-    const source = path.join(cwd, file);
+    const source = file === "manifest.json" ? path.join(cwd, "src", file) : path.join(cwd, file);
     assertFile(source, file);
     fs.copyFileSync(source, path.join(releaseDir, file));
   }

@@ -26,6 +26,7 @@ The CLI asks for:
 - example code or empty project
 
 It creates a TypeScript plugin project in the current directory and installs `@auvexis/sailor-sdk`.
+The plugin manifest is generated at `src/manifest.json` with local VS Code JSON schema settings for IntelliSense.
 
 Docs: https://sailor.auvexis.com/api/docs
 
@@ -36,6 +37,7 @@ sailor build
 ```
 
 Validates `manifest.json` with `@auvexis/sailor-sdk` and runs the plugin build script.
+The CLI reads the manifest from `src/manifest.json`.
 
 ## Release
 

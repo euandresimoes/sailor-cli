@@ -8,6 +8,11 @@ function readValue(value) {
   return value;
 }
 
+export function validateDescriptionPromptValue(value) {
+  if (!String(value ?? "").trim()) return "Description is required.";
+  return undefined;
+}
+
 export async function promptCreatePlugin() {
   const name = readValue(
     await text({
@@ -26,9 +31,7 @@ export async function promptCreatePlugin() {
     await text({
       message: "Description",
       placeholder: "Connects Sailor to OpenAI chat",
-      validate(value) {
-        if (!value.trim()) return "Description is required.";
-      },
+      validate: validateDescriptionPromptValue,
     }),
   );
   if (description === null) return null;
