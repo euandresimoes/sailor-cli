@@ -1,4 +1,4 @@
-const COMMANDS = new Set(["create", "build", "release"]);
+const COMMANDS = new Set(["create", "build", "release", "version"]);
 
 function normalizeFlag(flag) {
   return flag.replace(/^--/, "").replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());

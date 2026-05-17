@@ -27,5 +27,6 @@ describe("parseArgs", () => {
   it("detects help and version", () => {
     assert.equal(parseArgs(["--help"]).help, true);
     assert.equal(parseArgs(["-v"]).version, true);
+    assert.equal(parseArgs(["version"]).command, "version");
   });
 });

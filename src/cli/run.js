@@ -29,6 +29,11 @@ export async function run({ argv = process.argv.slice(2), cwd = process.cwd(), s
       return 0;
     }
 
+    if (parsed.command === "version") {
+      stdout.write(helpText(version));
+      return 0;
+    }
+
     if (parsed.command === "create") {
       if (parsed.subject !== "plugin") {
         throw new Error(`Unknown create target: ${parsed.subject}`);

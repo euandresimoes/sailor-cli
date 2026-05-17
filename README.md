@@ -19,14 +19,19 @@ sailor create
 
 The CLI asks for:
 
-- plugin name
+- handle (ID)
+- name
 - description
-- logo/icon, optional
+- icon URL, optional
+- category
+- author
 - repository URL, optional
 - example code or empty project
+- example template, when example code is enabled
 
 It creates a TypeScript plugin project in the current directory and installs `@auvexis/sailor-sdk`.
 The plugin manifest is generated at `src/manifest.json` with local VS Code JSON schema settings for IntelliSense.
+The generated project also includes a README that explains the manifest and where to start.
 
 Docs: https://sailor.auvexis.com/api/docs
 
@@ -38,6 +43,7 @@ sailor build
 
 Validates `manifest.json` with `@auvexis/sailor-sdk` and runs the plugin build script.
 The CLI reads the manifest from `src/manifest.json`.
+Before building, it increments `metadata.version` by one patch version.
 
 ## Release
 
@@ -45,10 +51,17 @@ The CLI reads the manifest from `src/manifest.json`.
 sailor release
 ```
 
-Builds the plugin and creates a `release/` folder with the files expected by Sailor server:
+Builds the plugin and creates a versioned folder inside `release/`:
+
+```text
+release/<plugin-id>-<version>/
+```
+
+That versioned folder contains the files expected by Sailor server:
 
 - `manifest.json`
 - `index.js`
 - `methods.js`
+- compiled helper files and folders from `dist/`
 - `package.json`
 - `package-lock.json`

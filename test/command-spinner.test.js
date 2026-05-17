@@ -6,6 +6,9 @@ import { releaseCommand } from "../src/commands/release.js";
 
 function fakeUi(events) {
   return {
+    banner(message) {
+      events.push(`banner:${message}`);
+    },
     intro(message) {
       events.push(`intro:${message}`);
     },
@@ -40,8 +43,10 @@ describe("command spinners", () => {
       /manifest/,
     );
 
-    assert.deepEqual(events, [
-      "intro:Sailor build",
+    assert.equal(events.length, 3);
+    assert.match(events[0], /^banner:\n/);
+    assert.doesNotMatch(events[0], /\n\n$/);
+    assert.deepEqual(events.slice(1), [
       "start:Building plugin",
       "stop:Build failed",
     ]);
@@ -61,8 +66,10 @@ describe("command spinners", () => {
       /manifest/,
     );
 
-    assert.deepEqual(events, [
-      "intro:Sailor release",
+    assert.equal(events.length, 3);
+    assert.match(events[0], /^banner:\n/);
+    assert.doesNotMatch(events[0], /\n\n$/);
+    assert.deepEqual(events.slice(1), [
       "start:Creating release",
       "stop:Release failed",
     ]);

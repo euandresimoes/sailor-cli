@@ -4,10 +4,13 @@ import { validateManifest } from "@auvexis/sailor-sdk";
 import { npmRun } from "../package-manager/npm.js";
 
 const RELEASE_FILES = ["manifest.json", "package.json", "package-lock.json"];
-const COMPILED_FILES = ["index.js", "methods.js"];
 
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
+}
+
+function writeJson(filePath, value) {
+  fs.writeFileSync(filePath, `${JSON.stringify(value, null, 2)}\n`, "utf8");
 }
 
 function assertFile(filePath, label) {
@@ -16,11 +19,59 @@ function assertFile(filePath, label) {
   }
 }
 
-export function validatePluginProject(cwd) {
-  const manifestPath = path.join(cwd, "src", "manifest.json");
-  assertFile(manifestPath, "manifest.json");
+function assertDirectory(filePath, label) {
+  if (!fs.existsSync(filePath) || !fs.statSync(filePath).isDirectory()) {
+    throw new Error(`${label} is missing: ${filePath}`);
+  }
+}
 
-  const result = validateManifest(readJson(manifestPath));
+function copyDirectory(sourceDir, targetDir) {
+  assertDirectory(sourceDir, sourceDir);
+  fs.mkdirSync(targetDir, { recursive: true });
+
+  for (const entry of fs.readdirSync(sourceDir, { withFileTypes: true })) {
+    const source = path.join(sourceDir, entry.name);
+    const target = path.join(targetDir, entry.name);
+
+    if (entry.isDirectory()) {
+      copyDirectory(source, target);
+      continue;
+    }
+
+    if (entry.isFile()) {
+      fs.copyFileSync(source, target);
+    }
+  }
+}
+
+function manifestPath(cwd) {
+  return path.join(cwd, "src", "manifest.json");
+}
+
+function incrementPatchVersion(version) {
+  const match = /^(\d+)\.(\d+)\.(\d+)$/.exec(version);
+  if (!match) {
+    throw new Error(`Invalid manifest version: ${version}`);
+  }
+
+  return `${match[1]}.${match[2]}.${Number(match[3]) + 1}`;
+}
+
+function bumpManifestPatchVersion(cwd) {
+  const filePath = manifestPath(cwd);
+  assertFile(filePath, "manifest.json");
+
+  const manifest = readJson(filePath);
+  manifest.metadata.version = incrementPatchVersion(manifest.metadata.version);
+  writeJson(filePath, manifest);
+  return manifest;
+}
+
+export function validatePluginProject(cwd) {
+  const filePath = manifestPath(cwd);
+  assertFile(filePath, "manifest.json");
+
+  const result = validateManifest(readJson(filePath));
   if (!result.valid) {
     throw new Error(`Invalid manifest:\n${result.errors.map((error) => `- ${error}`).join("\n")}`);
   }
@@ -29,6 +80,7 @@ export function validatePluginProject(cwd) {
 }
 
 export function buildPluginProject({ cwd, runner = npmRun } = {}) {
+  bumpManifestPatchVersion(cwd);
   validatePluginProject(cwd);
   runner(cwd, "build");
   return {
@@ -43,7 +95,9 @@ export function releasePluginProject({ cwd, runBuild = true, runner = npmRun } =
     runner(cwd, "build");
   }
 
-  const releaseDir = path.join(cwd, "release");
+  const releaseRootDir = path.join(cwd, "release");
+  const releaseDir = path.join(releaseRootDir, `${manifest.metadata.id}-${manifest.metadata.version}`);
+  fs.mkdirSync(releaseRootDir, { recursive: true });
   fs.rmSync(releaseDir, { recursive: true, force: true });
   fs.mkdirSync(releaseDir, { recursive: true });
 
@@ -53,11 +107,9 @@ export function releasePluginProject({ cwd, runBuild = true, runner = npmRun } =
     fs.copyFileSync(source, path.join(releaseDir, file));
   }
 
-  for (const file of COMPILED_FILES) {
-    const source = path.join(cwd, "dist", file);
-    assertFile(source, `dist/${file}`);
-    fs.copyFileSync(source, path.join(releaseDir, file));
-  }
+  const distDir = path.join(cwd, "dist");
+  assertFile(path.join(distDir, "index.js"), "dist/index.js");
+  copyDirectory(distDir, releaseDir);
 
   return {
     releaseDir,
