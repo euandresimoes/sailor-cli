@@ -31,7 +31,7 @@ describe("validatePluginInput", () => {
     );
   });
 
-  it("applies manifest defaults and rejects non-url icons", () => {
+  it("applies manifest defaults and accepts URL or plugin-relative icons", () => {
     assert.deepEqual(
       validatePluginInput({
         name: "simple-plugin",
@@ -51,15 +51,25 @@ describe("validatePluginInput", () => {
       },
     );
 
+    assert.equal(
+      validatePluginInput({
+        name: "local-icon",
+        displayName: "Local Icon",
+        description: "Local icon",
+        icon: "assets/icons/icon.svg",
+      }).icon,
+      "assets/icons/icon.svg",
+    );
+
     assert.throws(
       () =>
         validatePluginInput({
           name: "bad-icon",
           displayName: "Bad Icon",
           description: "Bad icon",
-          icon: "bot",
+          icon: "../icon.svg",
         }),
-      /image URL/,
+      /icon path/,
     );
   });
 

@@ -111,6 +111,11 @@ export function releasePluginProject({ cwd, runBuild = true, runner = npmRun } =
   assertFile(path.join(distDir, "index.js"), "dist/index.js");
   copyDirectory(distDir, releaseDir);
 
+  const assetsDir = path.join(cwd, "src", "assets");
+  if (fs.existsSync(assetsDir)) {
+    copyDirectory(assetsDir, path.join(releaseDir, "assets"));
+  }
+
   return {
     releaseDir,
     manifest,

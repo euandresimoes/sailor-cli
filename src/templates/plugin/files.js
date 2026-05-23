@@ -41,7 +41,9 @@ function manifestMetadata(input) {
     id: input.name,
     name: input.displayName,
     description: input.description,
-    icon: input.icon,
+    icon: input.icon || "assets/icons/icon.svg",
+    iconDark: "assets/icons/icon-dark.svg",
+    iconLight: "assets/icons/icon-light.svg",
     category: input.category,
     author: input.author,
     version: "1.0.0",
@@ -761,7 +763,18 @@ export function pluginFiles(input) {
     ],
     [".gitignore", "node_modules/\ndist/\nrelease/\n"],
     ["README.md", readme(input)],
+    ["src/assets/icons/icon.svg", defaultIconSvg("#2563eb")],
+    ["src/assets/icons/icon-dark.svg", defaultIconSvg("#f8fafc")],
+    ["src/assets/icons/icon-light.svg", defaultIconSvg("#0f172a")],
     ["src/index.ts", indexTs(input)],
     ["src/methods.ts", methodsTs(input)],
   ]);
+}
+
+function defaultIconSvg(color) {
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Plugin icon">
+  <rect width="64" height="64" rx="14" fill="${color}"/>
+  <path d="M22 20h17a11 11 0 0 1 0 22H28v8h-6V20Zm6 6v10h10.5a5 5 0 0 0 0-10H28Z" fill="white" opacity="0.92"/>
+</svg>
+`;
 }

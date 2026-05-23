@@ -62,6 +62,8 @@ describe("releasePluginProject", () => {
     fs.writeFileSync(path.join(projectDir, "dist", "index.js"), "export default {};");
     fs.writeFileSync(path.join(projectDir, "dist", "methods.js"), "export function createMethods() { return {}; }");
     fs.writeFileSync(path.join(projectDir, "dist", "utils", "format.js"), "export const format = String;");
+    fs.mkdirSync(path.join(projectDir, "src", "assets", "icons"), { recursive: true });
+    fs.writeFileSync(path.join(projectDir, "src", "assets", "icons", "icon.svg"), "<svg />");
 
     const result = releasePluginProject({
       cwd: projectDir,
@@ -73,5 +75,6 @@ describe("releasePluginProject", () => {
       assert.equal(fs.existsSync(path.join(result.releaseDir, file)), true);
     }
     assert.equal(fs.existsSync(path.join(result.releaseDir, "utils", "format.js")), true);
+    assert.equal(fs.existsSync(path.join(result.releaseDir, "assets", "icons", "icon.svg")), true);
   });
 });

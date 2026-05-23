@@ -54,9 +54,14 @@ describe("createPluginProject", () => {
     assert.equal(pkg.dependencies["@auvexis/sailor-sdk"], "latest");
     assert.equal(pkg.scripts.build, "tsc -p tsconfig.json");
     assert.equal(manifest.metadata.name, "Demo Plugin");
-    assert.equal(manifest.metadata.icon, "");
+    assert.equal(manifest.metadata.icon, "assets/icons/icon.svg");
+    assert.equal(manifest.metadata.iconDark, "assets/icons/icon-dark.svg");
+    assert.equal(manifest.metadata.iconLight, "assets/icons/icon-light.svg");
     assert.equal(manifest.metadata.category, "Tools");
     assert.equal(manifest.metadata.author, "Unknown");
+    assert.equal(fs.existsSync(path.join(result.projectDir, "src", "assets", "icons", "icon.svg")), true);
+    assert.equal(fs.existsSync(path.join(result.projectDir, "src", "assets", "icons", "icon-dark.svg")), true);
+    assert.equal(fs.existsSync(path.join(result.projectDir, "src", "assets", "icons", "icon-light.svg")), true);
     assert.match(index, /This is the plugin entrypoint/);
     assert.match(index, /id: manifest\.metadata\.id,\n\n/);
     assert.match(readme, /How `src\/manifest\.json` Works/);

@@ -1,4 +1,5 @@
 const KEBAB_CASE_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+const ICON_EXTENSION_PATTERN = /\.(svg|png|webp|jpg|jpeg)(\?|#|$)/i;
 
 function cleanOptionalString(value) {
   return typeof value === "string" ? value.trim() : "";
@@ -27,8 +28,8 @@ export function validatePluginInput(input) {
     throw new Error("Plugin description is required.");
   }
 
-  if (icon && !/^https?:\/\/\S+$/.test(icon)) {
-    throw new Error("Icon must be a valid image URL or empty.");
+  if (icon && !isSafeIconValue(icon)) {
+    throw new Error("Icon must be a valid image URL, data image, plugin-relative icon path or empty.");
   }
 
   if (repository && !/^https?:\/\/\S+$/.test(repository)) {
@@ -50,4 +51,14 @@ export function validatePluginInput(input) {
     withExample,
     exampleTemplate: withExample ? exampleTemplate : "blank",
   };
+}
+
+function isSafeIconValue(icon) {
+  if (/^https?:\/\/\S+$/.test(icon)) return true;
+  if (/^data:image\//i.test(icon)) return true;
+  if (icon.startsWith("file://") || icon.startsWith("/") || /^[a-zA-Z]:[\\/]/.test(icon)) return false;
+
+  const normalized = icon.replaceAll("\\", "/");
+  if (normalized.split("/").includes("..")) return false;
+  return ICON_EXTENSION_PATTERN.test(normalized);
 }
